@@ -2,4 +2,4 @@ This will eventually be an [SMF](http://www.simplemachines.org/) plugin to authe
 
 Work in progress.
 
-Bill St. Clair &lt;(billstclair@gmail.com)[mailto:billstclair@gmail.com]&gt;
+Bill St. Clair &lt;[billstclair@gmail.com](mailto:billstclair@gmail.com)&gt;
