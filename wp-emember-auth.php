@@ -62,34 +62,41 @@ function wpea_close_smf_db() {
   }
 }
 
-function wpea_get_conn_value($conn, $tbl, $name_col, $val_col, $name) {
-  if ($stmt = mysqli_prepare($conn, "SELECT $val_col FROM $tbl WHERE $name_col=? LIMIT 1")) {
+function wpea_get_conn_value($conn, $tbl, $name_col, $val_col, $name, $allowMultiple=false) {
+  $limit = $allowMultiple ? 1 : 2;
+  if ($stmt = mysqli_prepare($conn, "SELECT $val_col FROM $tbl WHERE $name_col=? LIMIT $limit")) {
     mysqli_stmt_bind_param($stmt, "s", $name);
     mysqli_stmt_execute($stmt);
     mysqli_stmt_store_result($stmt);
     $value = null;
     mysqli_stmt_bind_result($stmt, $value);
     mysqli_stmt_fetch($stmt);
+    $res = $value;
+    if (!$allowMultiple) {
+      $value = null;
+      mysqli_stmt_fetch($stmt);
+      if ($value != null) return null;
+    }
     mysqli_stmt_close($stmt);
-    return $value;
+    return $res;
   }
   return null;
 }
 
-function wpea_get_db_value($tbl, $name_col, $val_col, $name) {
+function wpea_get_db_value($tbl, $name_col, $val_col, $name, $allowMultiple=false) {
   global $wpea_db_prefix;
   if ($conn = wpea_open_db()) {
     $tbl = $wpea_db_prefix . $tbl;
-    return wpea_get_conn_value($conn, $tbl, $name_col, $val_col, $name);
+    return wpea_get_conn_value($conn, $tbl, $name_col, $val_col, $name, $allowMultiple);
   }
   return null;
 }
 
-function wpea_get_smf_db_value($tbl, $name_col, $val_col, $name) {
+function wpea_get_smf_db_value($tbl, $name_col, $val_col, $name, $allowMultiple=false) {
   global $db_prefix;
   if ($conn = wpea_open_smf_db()) {
     $tbl = $db_prefix . $tbl;
-    return wpea_get_conn_value($conn, $tbl, $name_col, $val_col, $name);
+    return wpea_get_conn_value($conn, $tbl, $name_col, $val_col, $name, $allowMultiple);
   }
   return null;
 }
@@ -217,8 +224,23 @@ function wpea_logged_in_username() {
   return $username;
 }
 
+// Looks up an SMF member's name by unique email
+function wpea_lookup_smf_member_by_email($email) {
+  return wpea_get_smf_db_value('members', 'email_address', 'member_name', $email);
+}
+
+function wpea_lookup_smf_member_email($member_name) {
+  return wpea_get_smf_db_value('members', 'member_name', 'email_address', $member_name);
+}
+
+// Returns an SMF member's ID
+function wpea_lookup_smf_member_id($member_name) {
+  return wpea_get_smf_db_value('members', 'member_name', 'id_member', $member_name);
+}
+
 // Convert a WP eMember username to an SMF member name.
 // This allows configuration to make them different, via $wpea_smf_member_names.
+// Matching depends on unique email addresses.
 function wpea_username_to_smf_member_name($username) {
   global $wpea_smf_member_names;
   if (isset($wpea_smf_member_names) && is_array($wpea_smf_member_names)) {
@@ -226,12 +248,23 @@ function wpea_username_to_smf_member_name($username) {
       return $wpea_smf_member_names[$username];
     }
   }
+  if ($email = wpea_get_user_email($username)) {
+    $res = wpea_lookup_smf_member_by_email($email);
+    if ($res) return $res;
+    if ($smf_email = wpea_lookup_smf_member_email($username)) {
+      if ($email != $smf_email) {
+	// There's already an SMF member with $username, but a different email address.
+	// If this were real, it would have been in $wpea_smf_member_names.
+	// Create a new $username that is not yet in the database
+	// This means that if you change the email in WP eMember, you MUST change it in SMF
+	for ($cnt=2; ; $cnt++) {
+	  $un = $username . $cnt;
+	  if (!wpea_lookup_smf_member_id($un)) return $un;
+	}
+      }
+    }
+  }
   return $username;
-}
-
-// Returns an SMF member's ID
-function wpea_lookup_smf_member_id($member_name) {
-  return wpea_get_smf_db_value('members', 'member_name', 'id_member', $member_name);
 }
 
 function wpea_create_smf_member($wp_name, $smf_name) {
@@ -279,7 +312,7 @@ function wpea_integrate_verify_user() {
   return $res;
 }
 
-// This goes in the mods install.php file. Included here because I'm looking at the doc now.
+// This goes in the mod's install.php file. Included here because I'm looking at the doc now.
 // http://wiki.simplemachines.org/smf/Integration_hooks#Adding_to_hooks
 function wpea_add_integration_functions() {
   add_integration_function('integrate_pre_include', '$sourcedir/wp-emember-auth.php',TRUE);
