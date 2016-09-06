@@ -244,16 +244,11 @@ function wpea_create_smf_member($wp_name, $smf_name) {
   if ($conn = wpea_open_smf_db()) {
     $date = time();
     $tbl = $db_prefix . 'members';
-    echo "Inserting '$wp_name' into SMF as '$smf_name', email: $email, date: $date, tbl; $tbl\n";
     if ($stmt = mysqli_prepare($conn, "INSERT INTO $tbl (member_name, date_registered, id_group, real_name, email_address, hide_email) VALUES (?, ?, ?, ?, ?, 1)")) {
       mysqli_stmt_bind_param($stmt, "siiss", $smf_name, $date, $group, $smf_name, $email);
       mysqli_stmt_execute($stmt);
       mysqli_stmt_close($stmt);
-      echo "  succeeded.\n";
       return true;
-    } else {
-      $err = mysqli_connect_error();
-      echo "Error inserting into $tbl: $err\n";
     }
   }
   return false;
