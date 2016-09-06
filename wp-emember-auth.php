@@ -54,6 +54,18 @@ function wpea_get_db_value($tbl, $name_col, $val_col, $name) {
   return null;
 }
 
+function wpea_set_db_value($tbl, $name_col, $val_col, $name, $value) {
+  global $wpea_db_prefix;
+  if ($conn = wpea_open_db()) {
+    $tbl = $wpea_db_prefix . $tbl;
+    if ($stmt = mysqli_prepare($conn, "UPDATE $tbl SET $val_col = ? WHERE $name_col=?")) {
+      mysqli_stmt_bind_param($stmt, "ss", $value, $name);
+      mysqli_stmt_execute($stmt);
+      mysqli_stmt_close($stmt);
+    }
+  }
+  return null;
+}
 
 function wpea_get_option($name) {
   return wpea_get_db_value('options', 'option_name', 'option_value', $name);
@@ -61,6 +73,14 @@ function wpea_get_option($name) {
 
 function wpea_get_user_password($username) {
   return wpea_get_db_value('wp_eMember_members_tbl', 'user_name', 'password', $username);
+}
+
+function wpea_last_session_impression($hmac) {
+  return wpea_get_db_value('wp_auth_session_tbl', 'session_id', 'last_impression', $hmac);
+}
+
+function wpea_set_last_session_impression($hmac, $time) {
+  wpea_set_db_value('wp_auth_session_tbl', 'session_id', 'last_impression', $hmac, $time);
 }
 
 // wp_salt('auth') from wp-includes/pluggable.php
@@ -93,3 +113,47 @@ function wpea_auth_cookie_name() {
   return 'wp_emember_' . wpea_cookiehash();
 }
 
+function wpea_cookie_value($cookie_name) {
+  if (!isset($_COOKIE[$cookie_name])) return null;
+  return $_COOKIE[$cookie_name];
+}
+
+// Return true if a user's WP eMember subscrition is still in effect.
+// To be done.
+// Need to process member_since & membership_level from wp_eMember_members_tbl,
+// using subscription_period & subscription_unit from wp_eMember_membership_tbl.
+// May also want a user setting to ignore this.
+function wpea_is_membership_current($username) {
+  return true;
+}
+
+// from current_time() in wp-includes/functions.php
+function wpea_current_mysql_time($gmt = 0) {
+  $format = 'Y-m-d H:i:s';
+  return $gmt ? gmdate($format) : gmdate($format, time() + (wpea_get_option( 'gmt_offset') * 3600));
+}
+
+// Finally, the actual authorization function
+// Returns the username if we're logged in as a WP eMember, or null otherwise.
+// From validate() in wp-content/plugins/wp-eMember/lib/class.emember_auth.php
+function wpea_logged_in_username() {
+  $cookie = wpea_cookie_value(wpea_auth_cookie_name());
+  if (!$cookie) return null;
+  //echo "cookie: $cookie\n";
+  $cookie_elements = explode('|', $cookie);
+  if (count($cookie_elements) != 3) return null;
+  list($username, $expiration, $hmac) = $cookie_elements;
+  //echo "username: $username, expiration: $expiration, hmac: $hmac, time: " . time() . "\n";
+  if ($expiration < time()) return null;
+  if (!wpea_is_membership_current($username)) return null;
+  $hash = wpea_user_password_hmac($username, $expiration);
+  //echo "hash: $hash\n";
+  if ($hmac != $hash) return null;
+  $last_impression = wpea_last_session_impression($hmac);
+  //echo "hmac: $hmac, last_impression: $last_impression\n";
+  if (!$last_impression) return null;
+  // Maybe I should do auto-logout here...
+  $current_time = wpea_current_mysql_time(true);
+  wpea_set_last_session_impression($hmac, $current_time);
+  return $username;
+}
