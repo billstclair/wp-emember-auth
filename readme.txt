@@ -6,6 +6,8 @@ For cases with existing SMF members who may not satisfy that criteria, there is 
 
 If an SMF user cannot be found, from the mapping table or with a matching email address, a new SMF member will be created, with the eMember username as both member name and real name and with the eMember email address. If there is already an SMF member with the eMember username, but a different email address, a new SMF member name will be created, by appending a number to the eMember username.
 
+The auto-created member account has no associated password, so if the user wants to change her "Account Settings", she'll have to go through the "forgot password" rigamarole to create one.
+
 Configuration is via new variables in the SMF [font=courier]Settings.php[/font] file. Most of these duplicate information that is already in the WordPress [font=courier]wp-config.php[/font] file. All parameter values must be copied verbatim, or it won't work.
 
 [font=courier]# From wp-config.php
@@ -29,3 +31,7 @@ $wpea_smf_member_names = array('wws' => 'Bill St. Clair',
 # Optional.
 $wpea_smf_member_group_id = 9;
 [/font]
+
+Code is at [url=https://github.com/billstclair/wp-emember-auth]github.com/billstclair/wp-emember-auth[/url].
+
+Bill St. Clair <billstclair@gmail.com>
