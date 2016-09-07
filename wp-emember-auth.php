@@ -333,6 +333,8 @@ function wpea_integrate_logout() {
   unset($_COOKIE[$cookie_name]);
   setcookie($cookie_name, '', time() - 3600, '/');
   wpea_delete_session($hmac);
+  wpea_close_smf_db();
+  wpea_close_db();
 }
 
 // Checks WP eMember session cookie for validity
