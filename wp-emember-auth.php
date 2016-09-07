@@ -125,6 +125,35 @@ function wpea_set_smf_db_value($tbl, $name_col, $val_col, $name, $value) {
   }
 }
 
+function wpea_conn_delete_row($conn, $tbl, $name_col, $name, $only_one=true) {
+  $limit = $only_one ? " LIMIT 1" : "";
+  if ($stmt = mysqli_prepare($conn, "DELETE FROM $tbl WHERE $name_col=?$LIMIT")) {
+    mysqli_stmt_bind_param($stmt, "s", $name);
+    mysqli_stmt_execute($stmt);
+    // Maybe we should get the ROW_COUNT(), but I don't need that for now
+    return tru;
+  }
+  return false;
+}
+
+function wpea_delete_db_row($tbl, $name_col, $name, $only_one=true) {
+  global $wpea_db_prefix;
+  if ($conn = wpea_open_db()) {
+    $tbl = $wpea_db_prefix . $tbl;
+    return wpea_conn_delete_row($conn, $tbl, $name_col, $name, $only_one);
+  }
+  return false;
+}
+
+function wpea_delete_smf_db_row($tbl, $name_col, $name, $only_one=true) {
+  global $db_prefix;
+  if ($conn = wpea_open_smf_db()) {
+    $tbl = $db_prefix . $tbl;
+    return wpea_conn_delete_row($conn, $tbl, $name_col, $name, $only_one);
+  }
+  return false;
+}
+
 function wpea_get_option($name) {
   return wpea_get_db_value('options', 'option_name', 'option_value', $name);
 }
@@ -147,6 +176,10 @@ function wpea_last_session_impression($hmac) {
 
 function wpea_set_last_session_impression($hmac, $time) {
   wpea_set_db_value('wp_auth_session_tbl', 'session_id', 'last_impression', $hmac, $time);
+}
+
+function wpea_delete_session($hmac) {
+  wpea_delete_db_row('wp_auth_session_tbl', 'session_id', $hmac);
 }
 
 // wp_salt('auth') from wp-includes/pluggable.php
@@ -285,6 +318,21 @@ function wpea_create_smf_member($wp_name, $smf_name) {
     }
   }
   return false;
+}
+
+// Called when the user logs out of SMF.
+// Remove the cookie that keeps them logged in to WP eMember.
+function wpea_integrate_logout() {
+  $cookie_name = wpea_auth_cookie_name();
+  $cookie = wpea_cookie_value($cookie_name);
+  if (!$cookie) return null;
+  //echo "cookie: $cookie\n";
+  $cookie_elements = explode('|', $cookie);
+  if (count($cookie_elements) != 3) return null;
+  list($username, $expiration, $hmac) = $cookie_elements;
+  unset($_COOKIE[$cookie_name]);
+  setcookie($cookie_name, '', time() - 3600, '/');
+  wpea_delete_session($hmac);
 }
 
 // Checks WP eMember session cookie for validity

@@ -30,9 +30,9 @@ $db_prefix = 'smf_';
 require_once('wp-emember-auth.php');
 
 $cookie_name = wpea_auth_cookie_name();
-$user = 'billstclair';  //'BillSC';
+$user = 'BillSC';  // 'billstclair';
 $pass = wpea_get_user_password($user);
-$time = '1474369886';  //'1474327520';
+$time = '1474327520';  //'1474369886';
 $hmac = wpea_user_password_hmac($user, $time);
 
 // Fake the cookie
