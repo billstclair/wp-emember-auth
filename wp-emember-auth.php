@@ -117,7 +117,7 @@ function wpea_set_db_value($tbl, $name_col, $val_col, $name, $value) {
   }
 }
 
-function wpea_set_smf__db_value($tbl, $name_col, $val_col, $name, $value) {
+function wpea_set_smf_db_value($tbl, $name_col, $val_col, $name, $value) {
   global $db_prefix;
   if ($conn = wpea_open_smf_db()) {
     $tbl = $db_prefix . $tbl;
