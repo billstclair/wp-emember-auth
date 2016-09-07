@@ -311,10 +311,3 @@ function wpea_integrate_verify_user() {
   wpea_close_db();
   return $res;
 }
-
-// This goes in the mod's install.php file. Included here because I'm looking at the doc now.
-// http://wiki.simplemachines.org/smf/Integration_hooks#Adding_to_hooks
-function wpea_add_integration_functions() {
-  add_integration_function('integrate_pre_include', '$sourcedir/wp-emember-auth.php',TRUE);
-  add_integration_function('integrate_verify_user', 'wpea_integrate_verify_user', TRUE);
-}

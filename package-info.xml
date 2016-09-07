@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<!DOCTYPE package-info SYSTEM "http://www.simplemachines.org/xml/package-info">
+<package-info xmlns="http://www.simplemachines.org/xml/package-info" xmlns:smf="http://www.simplemachines.org/">
+    <id>Bill St. Clair:wp-emember-auth</id>
+    <name>WP eMember Auth</name>
+    <version>0.1</version>
+    <type>modification</type>
+    <install>
+	<readme parsebbc="true">readme.txt</readme>
+	<code>install.php</code>
+	<require-file name="wp-emember-auth.php" destination="$sourcedir" />
+    </install>
+    <uninstall>
+	<code>uninstall.php</code>
+	<remove-file name="$sourcedir/wp-emember-auth.php" />
+    </uninstall>
+</package-info>

@@ -1,0 +1,4 @@
+#!/bin/bash
+
+rm -f wp-emember-auth.tar.gz
+tar -czf wp-emember-auth.tar.gz package-info.xml readme.txt install.php uninstall.php wp-emember-auth.php
