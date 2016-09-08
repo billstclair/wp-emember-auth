@@ -8,9 +8,10 @@ If an SMF user cannot be found, from the mapping table or with a matching email 
 
 The auto-created member account has no associated password, so if the user wants to change her "Account Settings", she'll have to go through the "forgot password" rigamarole to create one. But you may want to disable direct SMF login. See below for one way to do that.
 
-Configuration is via new variables in the SMF [font=courier]Settings.php[/font] file. Most of these duplicate information that is already in the WordPress [font=courier]wp-config.php[/font] file. All parameter values must be copied verbatim, or it won't work.
+Configuration is via new variables in the SMF [font=courier]Settings.php[/font] file. Most of these duplicate information that is already in the WordPress [font=courier]wp-config.php[/font] file. All parameter values must be copied verbatim, or it won't work (you may need to scroll the code block below see its end).
 
-[font=courier]# Copy these values from your wp-config.php. Do NOT use them as is!
+[code]
+# Copy these values from your wp-config.php. Do NOT use them as is!
 $wpea_db_server = 'localhost';          # DB_HOST
 $wpea_db_name = 'wp';                   # DB_NAME
 $wpea_db_user = 'root';                 # DB_USER
@@ -29,7 +30,8 @@ $wpea_smf_member_names = array('wws' => 'Bill St. Clair',
 
 # Set if you want new members to be put into a particular SMF group
 # Optional.
-$wpea_smf_member_group_id = 9;[/font]
+$wpea_smf_member_group_id = 9;
+[/code]
 
 You may want to disallow direct logins to SMF, and require user requests for email or displayed name changes to be handled by an administrator. One way to do that, if you're using Apache, or another web server that parses .htaccess files, is with an .htaccess file in the forum directory containing something like the following (where you may have to change "/member-login/" to be the path to the WP eMember login page on your system):
 
