@@ -6,7 +6,7 @@ For cases with existing SMF members who may not satisfy that criteria, there is 
 
 If an SMF user cannot be found, from the mapping table or with a matching email address, a new SMF member will be created, with the eMember username as both member name and real name and with the eMember email address. If there is already an SMF member with the eMember username, but a different email address, a new SMF member name will be created, by appending a number to the eMember username.
 
-The auto-created member account has no associated password, so if the user wants to change her "Account Settings", she'll have to go through the "forgot password" rigamarole to create one.
+The auto-created member account has no associated password, so if the user wants to change her "Account Settings", she'll have to go through the "forgot password" rigamarole to create one. But you may want to disable direct SMF login. See below for one way to do that.
 
 Configuration is via new variables in the SMF [font=courier]Settings.php[/font] file. Most of these duplicate information that is already in the WordPress [font=courier]wp-config.php[/font] file. All parameter values must be copied verbatim, or it won't work.
 
@@ -29,8 +29,18 @@ $wpea_smf_member_names = array('wws' => 'Bill St. Clair',
 
 # Set if you want new members to be put into a particular SMF group
 # Optional.
-$wpea_smf_member_group_id = 9;
-[/font]
+$wpea_smf_member_group_id = 9;[/font]
+
+You may want to disallow direct logins to SMF, and require user requests for email or displayed name changes to be handled by an administrator. One way to do that, if you're using Apache, or another web server that parses .htaccess files, is with an .htaccess files in the forum directory containing something like the following (where you may have to change "/member-login/" to be the path to the WP eMember login page on your system):
+
+[code]
+# Redirect from SMF login page to WP eMember login page
+RewriteEngine On
+
+RewriteCond %{QUERY_STRING} ^action=login.$ [OR]
+RewriteCond %{QUERY_STRING} ^action=reminder$
+RewriteRule . /member-login/? [R,L]
+[/code]
 
 Code is at [url=https://github.com/billstclair/wp-emember-auth]github.com/billstclair/wp-emember-auth[/url].
 
