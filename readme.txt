@@ -31,7 +31,7 @@ $wpea_smf_member_names = array('wws' => 'Bill St. Clair',
 # Optional.
 $wpea_smf_member_group_id = 9;[/font]
 
-You may want to disallow direct logins to SMF, and require user requests for email or displayed name changes to be handled by an administrator. One way to do that, if you're using Apache, or another web server that parses .htaccess files, is with an .htaccess files in the forum directory containing something like the following (where you may have to change "/member-login/" to be the path to the WP eMember login page on your system):
+You may want to disallow direct logins to SMF, and require user requests for email or displayed name changes to be handled by an administrator. One way to do that, if you're using Apache, or another web server that parses .htaccess files, is with an .htaccess file in the forum directory containing something like the following (where you may have to change "/member-login/" to be the path to the WP eMember login page on your system):
 
 [code]
 # Redirect from SMF login page to WP eMember login page
