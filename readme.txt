@@ -10,7 +10,7 @@ The auto-created member account has no associated password, so if the user wants
 
 Configuration is via new variables in the SMF [font=courier]Settings.php[/font] file. Most of these duplicate information that is already in the WordPress [font=courier]wp-config.php[/font] file. All parameter values must be copied verbatim, or it won't work.
 
-[font=courier]# From wp-config.php
+[font=courier]# Copy these values from your wp-config.php. Do NOT use them as is!
 $wpea_db_server = 'localhost';          # DB_HOST
 $wpea_db_name = 'wp';                   # DB_NAME
 $wpea_db_user = 'root';                 # DB_USER
