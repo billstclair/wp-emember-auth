@@ -39,7 +39,7 @@ You may want to disallow direct logins to SMF, and require user requests for ema
 # Redirect from SMF login page to WP eMember login page
 RewriteEngine On
 
-RewriteCond %{QUERY_STRING} ^action=login.$ [OR]
+RewriteCond %{QUERY_STRING} ^action=login.*$ [OR]
 RewriteCond %{QUERY_STRING} ^action=reminder$
 RewriteRule . /member-login/? [R,L]
 [/code]
