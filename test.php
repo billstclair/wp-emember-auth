@@ -1,6 +1,7 @@
 <?PHP
 
 // From wp-config.php
+/*
 $wpea_db_server = 'localhost';          // DB_HOST
 $wpea_db_name = 'wp';                   // DB_NAME
 $wpea_db_user = 'root';                 // DB_USER
@@ -10,6 +11,7 @@ $wpea_db_prefix = 'wp_ztxn_';           // $table_prefix
 $wpea_auth_key = 'dummy-auth-key';
 // AUTH_SALT
 $wpea_auth_salt = 'dummy-auth-salt';
+*/
 
 // Map WP eMember username to SMF member name
 // Useful for adding WP eMember authentication to an existing SMF forum.
