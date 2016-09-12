@@ -56,12 +56,12 @@ function wpea_load_env() {
 $wpea_conn = null;
 
 function wpea_open_db() {
+  global $wpea_env;
   global $wpea_conn;
 
   if ($wpea_conn) return $wpea_conn;
 
   wpea_load_env();
-  global $wpea_env;
   if ($wpea_env) {
     $wpea_conn = mysqli_connect($wpea_env['db-host'], $wpea_env['db-user'], $wpea_env['db-password'], $wpea_env['db-name']);
     return $wpea_conn;
@@ -234,6 +234,7 @@ function wpea_delete_session($hmac) {
 // wp_salt('auth') from wp-includes/pluggable.php
 function wpea_wp_auth_salt() {
   global $wpea_env;
+
   wpea_load_env();
   if ($wpea_env) {
     return $wpea_env['auth-key'] . $wpea_env['auth-salt'];
