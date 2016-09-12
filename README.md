@@ -1,6 +1,6 @@
 This is an [SMF](http://www.simplemachines.org/) plugin to authenticate the forum from the [WP eMember](https://www.tipsandtricks-hq.com/wordpress-emember-easy-to-use-wordpress-membership-plugin-1706) plugin's auth data and cookies.
 
-See ```readme.txt``` for installation instructions. To configure, you need to duplicate your WordPress ```wp-config.php``` database and authorization key and salt parameters (with similar, but different names) into your SMF ```Settings.php``` file.
+See ```readme.txt``` (displayed in SMF when you install the package) for installation instructions.
 
 Use the ```make-package``` script to create ```wp-emember-auth.tar.gz``` from the relevant files.
 
