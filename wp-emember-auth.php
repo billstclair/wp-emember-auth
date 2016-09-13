@@ -5,14 +5,11 @@
 // and the WordPress functions it calls.
 // It's also stand-alone, not dependent on the SMF or WordPress environment.
 
-$wpea_env = null;
+$wpea_conn = null;
 
-function wpea_load_env() {
-  global $wpea_env;
-
-  if ($wpea_env) return;     // Already done
-
-  // Support explicit configuration, usually in Settings.php
+function wpea_open_db() {
+  global $wpea_conn;
+  // These variables need to be added to your SMF Settings.php file, copied from your WordPress wp-config.php
   global $wpea_db_server;    // DB_HOST
   global $wpea_db_name;	     // DB_NAME
   global $wpea_db_user;      // DB_USER
@@ -21,49 +18,10 @@ function wpea_load_env() {
   global $wpea_auth_key;     // AUTH_KEY
   global $wpea_auth_salt;    // AUTH_SALT
 
-  if (isset($wpea_db_server, $wpea_db_name, $wpea_db_user, $wpea_db_password, $wpea_db_prefix, $wpea_auth_key, $wpea_auth_salt)) {
-    // Explicitly configured in Settings.php. Move those settings into $wpea_env
-    $wpea_env = Array('db-host' => $wpea_db_server,
-		      'db-name' => $wpea_db_name,
-		      'db-user' => $wpea_db_user,
-		      'db-password' => $wpea_db_password,
-		      'table-prefix' => $wpea_db_prefix,
-		      'auth-key' => $wpea_auth_key,
-		      'auth-salt' => $wpea_auth_salt);
-  } else {
-    // Not explicitly configured in Settings.php. Try to load wp-config.php
-    global $wpea_wp_dir, $boarddir;
-    if (!isset($wpea_wp_dir)) {
-      $wpea_wp_dir = "$boarddir/..";
-    }
-
-    $wp_config = "$wpea_wp_dir/wp-config.php";
-    if (file_exists($wp_config)) {
-      // This could easily break the forums
-      require_once($wp_config);
-      global $table_prefix;
-      $wpea_env = Array('db-host' => DB_HOST,
-			'db-name' => DB_NAME,
-			'db-user' => DB_USER,
-		        'db-password' => DB_PASSWORD,
-			'table-prefix' => $table_prefix,
-			'auth-key' => AUTH_KEY,
-			'auth-salt' => AUTH_SALT);
-    }
-  }
-}
-
-$wpea_conn = null;
-
-function wpea_open_db() {
-  global $wpea_env;
-  global $wpea_conn;
-
   if ($wpea_conn) return $wpea_conn;
 
-  wpea_load_env();
-  if ($wpea_env) {
-    $wpea_conn = mysqli_connect($wpea_env['db-host'], $wpea_env['db-user'], $wpea_env['db-password'], $wpea_env['db-name']);
+  if (isset($wpea_db_server, $wpea_db_name, $wpea_db_user, $wpea_db_password, $wpea_db_prefix, $wpea_auth_key, $wpea_auth_salt)) {
+    $wpea_conn = mysqli_connect($wpea_db_server, $wpea_db_user, $wpea_db_password, $wpea_db_name);
     return $wpea_conn;
   }
   return null;
@@ -125,19 +83,10 @@ function wpea_get_conn_value($conn, $tbl, $name_col, $val_col, $name, $allowMult
   return null;
 }
 
-function wpea_db_table($tbl) {
-  global $wpea_env;
-
-  wpea_load_env();
-  if ($wpea_env) {
-    $tbl = $wpea_env['table-prefix'] . $tbl;
-  }
-  return $tbl;
-}
-
 function wpea_get_db_value($tbl, $name_col, $val_col, $name, $allowMultiple=false) {
+  global $wpea_db_prefix;
   if ($conn = wpea_open_db()) {
-    $tbl = wpea_db_table($tbl);
+    $tbl = $wpea_db_prefix . $tbl;
     return wpea_get_conn_value($conn, $tbl, $name_col, $val_col, $name, $allowMultiple);
   }
   return null;
@@ -161,8 +110,9 @@ function wpea_set_conn_value($conn, $tbl, $name_col, $val_col, $name, $value) {
 }
 
 function wpea_set_db_value($tbl, $name_col, $val_col, $name, $value) {
+  global $wpea_db_prefix;
   if ($conn = wpea_open_db()) {
-    $tbl = wpea_db_table($tbl);
+    $tbl = $wpea_db_prefix . $tbl;
     wpea_set_conn_value($conn, $tbl, $name_col, $val_col, $name, $value);
   }
 }
@@ -187,8 +137,9 @@ function wpea_conn_delete_row($conn, $tbl, $name_col, $name, $only_one=true) {
 }
 
 function wpea_delete_db_row($tbl, $name_col, $name, $only_one=true) {
+  global $wpea_db_prefix;
   if ($conn = wpea_open_db()) {
-    $tbl = $wpea_db_table($tbl);
+    $tbl = $wpea_db_prefix . $tbl;
     return wpea_conn_delete_row($conn, $tbl, $name_col, $name, $only_one);
   }
   return false;
@@ -233,13 +184,9 @@ function wpea_delete_session($hmac) {
 
 // wp_salt('auth') from wp-includes/pluggable.php
 function wpea_wp_auth_salt() {
-  global $wpea_env;
-
-  wpea_load_env();
-  if ($wpea_env) {
-    return $wpea_env['auth-key'] . $wpea_env['auth-salt'];
-  };
-  return "this ain't your mama's salt.";
+  global $wpea_auth_key;
+  global $wpea_auth_salt;
+  return $wpea_auth_key . $wpea_auth_salt;
 }
 
 // The b_hash() function in wp-content/plugins/wp-eMember/lib/class.emember_auth.php
