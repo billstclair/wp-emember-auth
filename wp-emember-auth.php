@@ -7,6 +7,17 @@
 
 $wpea_env = null;
 
+function wpea_prepare_eval_file($file) {
+  $str = file_get_contents($file);
+  $pattern = array('/.*require.*/',
+                   '/.*require_once.*/',
+                   '/.*include.*/',
+                   '/.*include_once.*/');
+  $str = preg_replace($pattern, '', $str);
+  $str = "namespace wpea;\n?>\n$str";
+  return $str;
+}
+
 function wpea_load_env() {
   global $wpea_env;
 
