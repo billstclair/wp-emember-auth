@@ -50,16 +50,15 @@ function wpea_load_env() {
 
     $wp_config = "$wpea_wp_dir/wp-config.php";
     if (file_exists($wp_config)) {
-      // This could easily break the forums
-      require_once($wp_config);
-      global $table_prefix;
+      // This could potentially generate a fatal error and die.
+      eval(wpea_prepare_eval_file($wp_config));
       $wpea_env = Array('db-host' => DB_HOST,
-			'db-name' => DB_NAME,
-			'db-user' => DB_USER,
-		        'db-password' => DB_PASSWORD,
-			'table-prefix' => $table_prefix,
-			'auth-key' => AUTH_KEY,
-			'auth-salt' => AUTH_SALT);
+                        'db-name' => DB_NAME,
+                        'db-user' => DB_USER,
+                        'db-password' => DB_PASSWORD,
+                        'table-prefix' => $table_prefix,
+                        'auth-key' => AUTH_KEY,
+                        'auth-salt' => AUTH_SALT);
     }
   }
 }
