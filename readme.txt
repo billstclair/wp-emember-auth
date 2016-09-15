@@ -8,7 +8,7 @@ If an SMF user cannot be found, from the mapping table or with a matching email 
 
 The auto-created member account has no associated password, so if the user wants to change her "Account Settings", she'll have to go through the "forgot password" rigamarole to create one. But you may want to disable direct SMF login. See below for one way to do that.
 
-You have two choices for configuring access to your WordPress database. If you do nothing, the plugin will look for the file [font=courier]wp-config.php[/font] in the parent directory of your SMF directory. If it finds it, it will load it, and use the variables it defines.
+You have two choices for configuring access to your WordPress database. If you do nothing, the plugin will look for the file [font=courier]wp-config.php[/font] in the parent directory of your SMF directory. If it finds it, it will load it (read it, eliminate the [font=courier]require_once[/font] at the end, and eval the rest), and use the variables it defines.
 
 If you want to load the existing [font=courier]wp-config.php[/font], but your WordPress directory is NOT the parent directory of your SMF directory, you can specify the WordPress directory with a line like the following in your SMF [font=courier]Settings.php[/font] file (it should NOT end with a slash):
 
@@ -16,7 +16,7 @@ If you want to load the existing [font=courier]wp-config.php[/font], but your Wo
 $wpea_wp_dir = "/var/www/html";
 [/code]
 
-It is possible that loading the WordPress [font=courier]wp-settings.php[/font] file will break your SMF. It works for me with SMF 2.0.11 and WordPress 4.6, but it may not work in some other versions. In that case, you'll need to configure the WordPress database settings yourself. You can do this by adding the following at the end of your SMF [font=courier]Settings.php[/font] file:
+It is possible that evaluating the WordPress [font=courier]wp-settings.php[/font] file will break your SMF. It works for me with SMF 2.0.11 and WordPress 4.6, but it may not work in some other versions. In that case, you'll need to configure the WordPress database settings yourself. You can do this by adding the following at the end of your SMF [font=courier]Settings.php[/font] file:
 
 [code]
 # Copy these values from your wp-config.php. Do NOT use them as is!
@@ -52,7 +52,8 @@ You may want to disallow direct logins to SMF, and require user requests for ema
 RewriteEngine On
 
 RewriteCond %{QUERY_STRING} ^action=login.*$ [OR]
-RewriteCond %{QUERY_STRING} ^action=reminder$
+RewriteCond %{QUERY_STRING} ^action=reminder$ [OR]
+RewriteCond %{QUERY_STRING} ^action=register.*$
 RewriteRule . /member-login/? [R,L]
 [/code]
 
