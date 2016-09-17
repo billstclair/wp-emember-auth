@@ -198,7 +198,7 @@ function wpea_conn_delete_row($conn, $tbl, $name_col, $name, $only_one=true) {
 
 function wpea_delete_db_row($tbl, $name_col, $name, $only_one=true) {
   if ($conn = wpea_open_db()) {
-    $tbl = $wpea_db_table($tbl);
+    $tbl = wpea_db_table($tbl);
     return wpea_conn_delete_row($conn, $tbl, $name_col, $name, $only_one);
   }
   return false;
