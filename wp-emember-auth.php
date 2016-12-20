@@ -187,11 +187,11 @@ function wpea_set_smf_db_value($tbl, $name_col, $val_col, $name, $value) {
 
 function wpea_conn_delete_row($conn, $tbl, $name_col, $name, $only_one=true) {
   $limit = $only_one ? " LIMIT 1" : "";
-  if ($stmt = mysqli_prepare($conn, "DELETE FROM $tbl WHERE $name_col=?$LIMIT")) {
+  if ($stmt = mysqli_prepare($conn, "DELETE FROM $tbl WHERE $name_col=?$limit")) {
     mysqli_stmt_bind_param($stmt, "s", $name);
     mysqli_stmt_execute($stmt);
     // Maybe we should get the ROW_COUNT(), but I don't need that for now
-    return tru;
+    return true;
   }
   return false;
 }
@@ -227,6 +227,10 @@ function wpea_get_user_password($username) {
 
 function wpea_get_user_email($username) {
   return wpea_get_emember_value($username, 'email');
+}
+
+function wpea_get_user_account_state($username) {
+  return wpea_get_emember_value($username, 'account_state');
 }
 
 function wpea_last_session_impression($hmac) {
@@ -416,6 +420,11 @@ function wpea_integrate_verify_user() {
 	if (wpea_create_smf_member($username, $smf_member_name)) {
 	  $id = wpea_lookup_smf_member_id($smf_member_name);
 	}
+      } else {
+        $state = wpea_get_user_account_state($username);
+        if ($state != 'active') {
+          return 0;
+        }
       }
       if ($id) $res = $id;
     }
